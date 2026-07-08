@@ -1,13 +1,39 @@
 import tkinter as tk
 from tkinter import ttk
+import os
+# os looks through files in the directory and checks if the file exists. If it does, it opens it. If not, it creates a new file.
 
 # 1. Initialize the application window
-root = tk.Tk()
-root.title("Small & Simple Notes")
-root.geometry("400x300")
+window = tk.Tk()
+window.title("Small & Simple Notes")
+window.geometry("400x300")
+window.configure(bg="#08728f")  # background
+
+# Memory setup
+SAVE_FILE = "my_notes_save.txt"
+
+def load_notes():
+    """Reads the save file and inserts it into the text box if it exists."""
+    if os.path.exists(SAVE_FILE):
+        with open(SAVE_FILE, "r", encoding="utf-8") as file:
+            note_box.insert("1.0", file.read())
+
+def save_and_close():
+    """Gets the text, saves it to the file, and destroys the window."""
+    # Get all text from line 1, character 0 to the end (minus Tkinter's default newline)
+    current_text = note_box.get("1.0", "end-1c")
+    
+    with open(SAVE_FILE, "w", encoding="utf-8") as file:
+        file.write(current_text)
+        
+    # Close the application
+    window.destroy()
+
+# Intercept the window's close button (the 'X') to trigger the save function
+window.protocol("WM_DELETE_WINDOW", save_and_close)
 
 # 2. Create a frame layout to hold the text box and scrollbar
-frame = ttk.Frame(root)
+frame = ttk.Frame(window)
 frame.pack(expand=True, fill="both", padx=10, pady=10)
 
 # 3. Add the vertical scrollbar
@@ -17,9 +43,14 @@ scrollbar.pack(side="right", fill="y")
 # 4. Create the multi-line text box and link it to the scrollbar
 note_box = tk.Text(frame, wrap="word", yscrollcommand=scrollbar.set)
 note_box.pack(side="left", expand=True, fill="both")
+note_box.config(bg="#ffffff", fg="#000000", font=("American Typewriter", 12), relief="solid", bd=2)  # White background, black text
 
 # Configure scrollbar to move the text view
 scrollbar.config(command=note_box.yview)
 
+#. LOAD PREVIOUS NOTES
+# We call this right before starting the main loop so the text is ready when the UI appears
+load_notes()
+
 # Start the application loop
-root.mainloop()
+window.mainloop()
